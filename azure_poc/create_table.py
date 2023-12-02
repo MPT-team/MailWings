@@ -26,20 +26,16 @@ except mysql.connector.Error as err:
 else:
     cursor = conn.cursor()
 
-# Drop previous table of same name if one exists
-cursor.execute("DROP TABLE IF EXISTS inventory;")
-print("Finished dropping table (if existed).")
-
-# Create table
-cursor.execute("CREATE TABLE inventory (id serial PRIMARY KEY, name VARCHAR(50), quantity INTEGER);")
-print("Finished creating table.")
+# # Drop previous table of same name if one exists
+# cursor.execute("DROP TABLE IF EXISTS inventory;")
+# print("Finished dropping table (if existed).")
+#
+# # Create table
+# cursor.execute("CREATE TABLE inventory (id serial PRIMARY KEY, name VARCHAR(50), quantity INTEGER);")
+# print("Finished creating table.")
 
 # Insert some data into table
-cursor.execute("INSERT INTO inventory (name, quantity) VALUES (%s, %s);", ("banana", 150))
-print("Inserted", cursor.rowcount, "row(s) of data.")
-cursor.execute("INSERT INTO inventory (name, quantity) VALUES (%s, %s);", ("orange", 154))
-print("Inserted", cursor.rowcount, "row(s) of data.")
-cursor.execute("INSERT INTO inventory (name, quantity) VALUES (%s, %s);", ("apple", 100))
+cursor.execute("INSERT INTO USERS (name, token, bot_username, chat_id) VALUES (%s, %s, %s, %s);", ("banana", "tokenik", "bocik", 1))
 print("Inserted", cursor.rowcount, "row(s) of data.")
 
 # Cleanup
