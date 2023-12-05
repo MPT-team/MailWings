@@ -1,5 +1,5 @@
-from password import password
-from email.message import EmailMessage
+from secret import password
+from email_module.message import EmailMessage
 import ssl
 import smtplib
 

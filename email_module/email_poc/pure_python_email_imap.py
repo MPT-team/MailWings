@@ -1,6 +1,6 @@
 import imaplib
 import email
-from password import password
+from secret import password
 from email.header import decode_header
 
 
