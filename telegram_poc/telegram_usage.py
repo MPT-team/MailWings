@@ -25,11 +25,11 @@ async def prioritized_emails_command(update: Update, context: ContextTypes.DEFAU
 
 async def add_email_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # SELECT * FROM EMAILS WHERE EMAILS.uid = TOKEN
-    await update.message.reply_text('To add email to high-priority list type: add email')
+    await update.message.reply_text('To add email_module to high-priority list type: add email_module')
 
 async def delete_email_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # SELECT * FROM EMAILS WHERE EMAILS.uid = TOKEN
-    await update.message.reply_text('To delete email from high-priority list type: delete email')
+    await update.message.reply_text('To delete email_module from high-priority list type: delete email_module')
 
 async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(f'Update {update} caused error {context.error}')

@@ -50,4 +50,4 @@ wheels/
 .installed.cfg
 *.egg
 
-password.py
+secret.py
