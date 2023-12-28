@@ -68,8 +68,7 @@ def check_emails(information, bot):
 
                     print(f"LOGGER - INFO - [{now.strftime('%H:%M:%S')}] PIORITY EMAIL WAS SEND {sender_email}")
                     
-                    send_telegram_notification(information, sender_email, subject, bot, open_ai_response)
                     send_sms_notification(information, sender_email, subject, open_ai_response)
-
+                    send_telegram_notification(information, sender_email, subject, bot, open_ai_response)
     # Logout
     mail.logout()

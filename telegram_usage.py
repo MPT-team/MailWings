@@ -38,7 +38,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def end_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     stop_email_pooling_list[-1].set()
     email_pooling_list[-1].join()
-    await update.message.reply_text('Thanks for using monitoring pioritized mails. See you soon!')
+    print("LOGGER - INFO - Monitoring pioritized mails is stopped")
+    await update.message.reply_text('Thanks for using our feature. See you soon!')
 
 async def show_prioritized_emails_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print("LOGGER - INFO - Emails show command start")

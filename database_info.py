@@ -13,24 +13,24 @@ config = {
 def create_database_connection():
     try:
         conn = mysql.connector.connect(**config)
-        print("Connection established")
+        print("LOGGER - INFO - Connection established")
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-            print("Something is wrong with the user name or password")
+            print("LOGGER - INFO - Something is wrong with the user name or password")
         elif err.errno == errorcode.ER_BAD_DB_ERROR:
-            print("Database does not exist")
+            print("LOGGER - INFO - Database does not exist")
         else:
             print(err)
     else:
         cursor = conn.cursor()   
 
     cursor.execute("INSERT INTO USERS (name, token, bot_username, chat_id) VALUES (%s, %s, %s, %s);", ("banana", "tokenik", "bocik", 1))
-    print("Inserted", cursor.rowcount, "row(s) of data.")
+    print("LOGGER - INFO - Inserted", cursor.rowcount, "row(s) of data.")
 
     conn.commit()
     cursor.close()
     conn.close()
-    print("Done.")
+    print("LOGGER - INFO - Data base acction is DONE.")
 
 def get_database_information():
     user_information = {}
