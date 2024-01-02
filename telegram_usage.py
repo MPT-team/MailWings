@@ -236,9 +236,8 @@ def delete_last_message(update: Update, context: CallbackContext):
 
 
 if __name__ == '__main__':
-    delete_priority_mail("cos@gmail.com")
     handlers = initialize_handlers()
-    delete_priority_mail("cos@gmail.com")
+
     app = Application.builder().token(information['token']).build()
 
     initialize_app()
