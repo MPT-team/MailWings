@@ -1,12 +1,12 @@
 import imaplib
 import email
 from datetime import datetime
-from telegram_poc.telegram_notification import send_telegram_notification
+from telegram_notification import send_telegram_notification
 from sms_notification import send_sms_notification
 from openai import OpenAI
 
-
 SLEEP_TIME = 5
+
 
 def get_email_body(msg):
     body = ""
@@ -18,6 +18,7 @@ def get_email_body(msg):
         body = msg.get_payload(decode=True).decode("utf-8")
     return body
 
+
 def generate_openai_response(body, key):
     client = OpenAI(api_key=key)
 
@@ -28,11 +29,12 @@ def generate_openai_response(body, key):
     completion = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[
-        {"role": "system", "content": message},
+            {"role": "system", "content": message},
         ]
     )
 
     return completion.choices[0].message.content
+
 
 def check_emails(information, bot):
     # Connect to the IMAP server
@@ -67,7 +69,7 @@ def check_emails(information, bot):
                     open_ai_response = generate_openai_response(body, information['openai'])
 
                     print(f"LOGGER - INFO - [{now.strftime('%H:%M:%S')}] PIORITY EMAIL WAS SEND {sender_email}")
-                    
+
                     send_sms_notification(information, sender_email, subject, open_ai_response)
                     send_telegram_notification(information, sender_email, subject, bot, open_ai_response)
     # Logout

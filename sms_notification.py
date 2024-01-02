@@ -1,4 +1,4 @@
-from sms.sms_sender import send_sms
+from sms_sender import send_sms
 from jinja2 import Environment, FileSystemLoader
 
 def render_template(template_path, data):

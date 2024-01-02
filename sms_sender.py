@@ -1,6 +1,7 @@
 from twilio.rest import Client
 
-def send_sms(information ,sms_body):
+
+def send_sms(information, sms_body):
     account_sid = information['account_sid']
     auth_token = information['auth_token']
 

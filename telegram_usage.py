@@ -1,29 +1,33 @@
 from telegram import Update, ReplyKeyboardRemove
-from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters, ConversationHandler, CallbackContext
+from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters, ConversationHandler, \
+    CallbackContext
 import telebot
 import threading
 import time
 from email_listener import check_emails, SLEEP_TIME
-from database_info import get_database_information
+from database_info import get_database_information, add_priority_mail, delete_priority_mail
 
 ADD_EMAIL, DELETE_EMAIL, LOGIN = range(3)
 
-#DB z bazy zczytujemy wszystkie potrzebne info o userze
+# DB z bazy zczytujemy wszystkie potrzebne info o userze
 
 information = get_database_information()
 bot = telebot.TeleBot(token=information['token'])
 
-#POOLING
+
+# POOLING
 
 def email_polling():
     while not stop_email_pooling_list[-1].is_set():
         check_emails(information, bot)
         time.sleep(SLEEP_TIME)
 
+
 stop_email_pooling_list = []
 email_pooling_list = []
 
-#HANDLERS
+
+# HANDLERS
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print("LOGGER - INFO - Login process begin")
@@ -32,14 +36,18 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     return LOGIN
 
+
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text('To start monitoring your high-priority emails send or press /start \nTo add high-priority mail send or press /add \nTo delete high-priority mail write or press /delete \nTo show all high-priority mails write or press /show')
+    await update.message.reply_text(
+        'To start monitoring your high-priority emails send or press /start \nTo add high-priority mail send or press /add \nTo delete high-priority mail write or press /delete \nTo show all high-priority mails write or press /show')
+
 
 async def end_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     stop_email_pooling_list[-1].set()
     email_pooling_list[-1].join()
     print("LOGGER - INFO - Monitoring pioritized mails is stopped")
     await update.message.reply_text('Thanks for using our feature. See you soon!')
+
 
 async def show_prioritized_emails_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print("LOGGER - INFO - Emails show command start")
@@ -52,11 +60,13 @@ async def show_prioritized_emails_command(update: Update, context: ContextTypes.
     await update.message.reply_text('This is the list of your high-priority emails:')
     await update.message.reply_text(response)
 
+
 async def add_email_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     print("LOGGER - INFO - Email add command start")
     await update.message.reply_text('Please write the email which you want to add.')
-    
+
     return ADD_EMAIL
+
 
 async def delete_email_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     print("LOGGER - INFO - Email delete command start")
@@ -71,11 +81,13 @@ async def delete_email_command(update: Update, context: ContextTypes.DEFAULT_TYP
 
     return DELETE_EMAIL
 
+
 async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(f'LOGGER - INFO - Update {update} caused error {context.error}')
 
+
 async def start_email_polling(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    text: str =  update.message.text
+    text: str = update.message.text
 
     bot.delete_message(information['configuration_chat_id'], update.message.id)
     response = "Password was entered"
@@ -94,13 +106,14 @@ async def start_email_polling(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     return ConversationHandler.END
 
+
 async def add_email(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    text: str =  update.message.text
+    text: str = update.message.text
     print(f'User ({update.message.chat.id}) wants to add email: "{text}"')
 
     if text:
         information['priority_emails'].append(text)
-        #DB dodajemy do bazy danych i jest update PRIORITY_EMAILS
+        add_priority_mail(text)
         response = "Mail successfully added to prioritized emails!"
     else:
         response = "Something went wrong, try one more time by executing /add"
@@ -111,14 +124,15 @@ async def add_email(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     return ConversationHandler.END
 
+
 async def delete_email(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    text: str =  update.message.text
+    text: str = update.message.text
     print(f'LOGGER - INFO - User ({update.message.chat.id}) wants to delete email: "{text}"')
 
     for pioritized_email in information['priority_emails']:
         if text == pioritized_email:
             information['priority_emails'].remove(text)
-            #DB usuwamy z bazy danych i jest update PRIORITY_EMAILS
+            delete_priority_mail(text)
             response = "Mail successfully deleted from prioritized emails!"
             break
         else:
@@ -130,40 +144,45 @@ async def delete_email(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
 
     return ConversationHandler.END
 
+
 async def wrong_email_add(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     response = "You entered the wrong structure of the email, e.g., without @. Try one more time by typing /add!"
-    
+
     await update.message.reply_text(response)
 
     print(f'MailWings ({update.message.chat.id}) in: {response}')
 
     return ConversationHandler.END
 
+
 async def wrong_email_delete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     response = "You entered the wrong structure of the email, e.g., without @. Try one more time by typing /delete!"
-    
+
     await update.message.reply_text(response)
 
     print(f'LOGGER - INFO - MailWings ({update.message.chat.id}) in: {response}')
 
     return ConversationHandler.END
 
+
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.message.reply_text("Something went wrong.", reply_markup=ReplyKeyboardRemove())
 
     return ConversationHandler.END
 
+
 # INITIALIZATION
 
 def initialize_app():
-    print("LOGGER - INFO - Start MailWIngs application")
-    
+    print("LOGGER - INFO - Start MailWings application")
+
     for handler in handlers:
         app.add_handler(handler)
-    
+
     app.add_error_handler(error)
 
     app.run_polling(poll_interval=3)
+
 
 def initialize_handlers():
     handlers = [
@@ -179,7 +198,7 @@ def initialize_handlers():
         },
         fallbacks=[CommandHandler("cancel", cancel)],
     )
- 
+
     add_email_handler = ConversationHandler(
         entry_points=[CommandHandler('add', add_email_command)],
         states={
@@ -204,7 +223,8 @@ def initialize_handlers():
 
     return handlers
 
-#SECURITY
+
+# SECURITY
 
 def delete_last_message(update: Update, context: CallbackContext):
     global last_message_id
@@ -214,9 +234,11 @@ def delete_last_message(update: Update, context: CallbackContext):
     else:
         update.message.reply_text("No messages to delete.")
 
-if __name__ == '__main__':
-    handlers = initialize_handlers()
 
+if __name__ == '__main__':
+    delete_priority_mail("cos@gmail.com")
+    handlers = initialize_handlers()
+    delete_priority_mail("cos@gmail.com")
     app = Application.builder().token(information['token']).build()
 
     initialize_app()

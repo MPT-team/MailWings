@@ -1,11 +1,13 @@
 from jinja2 import Environment, FileSystemLoader
 
+
 def render_template(template_path, data):
     env = Environment(loader=FileSystemLoader('.'))
 
     template = env.get_template(template_path)
 
     return template.render(data)
+
 
 def send_telegram_notification(information, sender_email, subject, bot, open_ai_response):
     # variables
