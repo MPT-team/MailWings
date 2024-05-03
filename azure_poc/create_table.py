@@ -1,7 +1,6 @@
 import mysql.connector
 from mysql.connector import errorcode
-
-# Obtain connection string information from the portal
+import hashlib
 
 config = {
     'host': 'poc.mysql.database.azure.com',
@@ -11,35 +10,68 @@ config = {
     'database': 'poc-baza'
 }
 
-# Construct connection string
+def connect_to_database(config):
+    try:
+        conn = mysql.connector.connect(**config)
+        print("Connection established")
+        return conn
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Something is wrong with the username or password")
+        elif err.errno == errorcode.ER_BAD_DB_ERROR:
+            print("Database does not exist")
+        else:
+            print(err)
+        return None
 
-try:
-    conn = mysql.connector.connect(**config)
-    print("Connection established")
-except mysql.connector.Error as err:
-    if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-        print("Something is wrong with the user name or password")
-    elif err.errno == errorcode.ER_BAD_DB_ERROR:
-        print("Database does not exist")
-    else:
-        print(err)
-else:
-    cursor = conn.cursor()
+def hash_token(token):
+    hashed_token = hashlib.sha256(token.encode()).hexdigest()
+    return hashed_token
 
-# # Drop previous table of same name if one exists
-# cursor.execute("DROP TABLE IF EXISTS inventory;")
-# print("Finished dropping table (if existed).")
-#
-# # Create table
-# cursor.execute("CREATE TABLE inventory (id serial PRIMARY KEY, name VARCHAR(50), quantity INTEGER);")
-# print("Finished creating table.")
+def insert_user(name, token, bot_username, chat_id):
+    conn = connect_to_database(config)
+    if conn:
+        try:
+            cursor = conn.cursor()
+            hashed_token = hash_token(token)
 
-# Insert some data into table
-cursor.execute("INSERT INTO USERS (name, token, bot_username, chat_id) VALUES (%s, %s, %s, %s);", ("banana", "tokenik", "bocik", 1))
-print("Inserted", cursor.rowcount, "row(s) of data.")
+            cursor.execute("INSERT INTO Users (name, token, bot_username, chat_id) VALUES (%s, %s, %s, %s);", (name, hashed_token, bot_username, chat_id))
+            conn.commit()
+            print("Inserted", cursor.rowcount, "row(s) of data.")
 
-# Cleanup
-conn.commit()
-cursor.close()
-conn.close()
-print("Done.")
+        except mysql.connector.Error as err:
+            print("Error:", err)
+            conn.rollback()
+
+        finally:
+            cursor.close()
+            conn.close()
+            print("Connection closed.")
+
+def select_user(name, token):
+    conn = connect_to_database(config)
+    if conn:
+        try:
+            cursor = conn.cursor()
+            hashed_token = hash_token(token)
+
+            cursor.execute("SELECT * FROM Users WHERE name = %s AND token = %s LIMIT 1;", (name, hashed_token))
+            result = cursor.fetchone()
+            if result:
+                print("User exists:", result)
+            else:
+                print("User does not exist.")
+
+        except mysql.connector.Error as err:
+            print("Error:", err)
+
+        finally:
+            cursor.close()
+            conn.close()
+            print("Connection closed.")
+
+insert_user("Kate", "secret123", "kate12", 1)
+
+name_input = input("Enter name: ")
+token_input = input("Enter token: ")
+select_user(name_input, token_input)
