@@ -1,6 +1,6 @@
 from render.render_data import render_template
 from render.read_config import read_config
-from sms.sms_sender import send_sms
+from sms_sender import send_sms
 
 # variables
 template_file_path = 'templates/sms_notification_template.jinja'
